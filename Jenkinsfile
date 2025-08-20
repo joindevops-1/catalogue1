@@ -125,7 +125,7 @@ pipeline {
                         def criticalIssues = findings.imageScanFindings.findings.findAll {
                             it.severity == 'CRITICAL'
                         }
-                        echo "size: ${criticalIssues}"
+                        echo "size: ${findings}"
                         if (criticalIssues.size() > 0) {
                             error("Deployment blocked: ${criticalIssues.size()} critical vulnerabilities found.")
                         }
