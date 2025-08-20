@@ -115,6 +115,24 @@ pipeline {
                 }
             }
         }
+
+        stage('ECR Scan') {
+            steps {
+                script {
+                    withAWS(credentials: 'aws-creds', region: 'us-east-1') {
+                        def scanResults = sh(script: "aws ecr describe-image-scan-findings --repository-name 'roboshop/user' --image-id imageTag=1.0.0 --region 'us-east-1'", returnStdout: true)
+                        def findings = readJSON text: scanResults
+                        def criticalIssues = findings.imageScanFindings.findings.findAll {
+                            it.severity == 'CRITICAL'
+                        }
+                        if (criticalIssues.size() > 0) {
+                            error("Deployment blocked: ${criticalIssues.size()} critical vulnerabilities found.")
+                        }
+
+                    }
+                }
+            }
+        }
         stage('Trigger Deploy') {
             when{
                 expression { params.deploy }
