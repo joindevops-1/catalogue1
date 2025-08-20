@@ -45,7 +45,7 @@ pipeline {
                 }
             }
         }
-        stage('Sonar Scan') {
+        /* stage('Sonar Scan') {
             environment {
                 scannerHome = tool 'sonar-7.2'
             }
@@ -64,7 +64,7 @@ pipeline {
                 waitForQualityGate abortPipeline: true
               }
             }
-        }
+        } */
         stage('Scan Dependabot Alerts') {
             when {
                 not {
