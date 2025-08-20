@@ -65,6 +65,43 @@ pipeline {
               }
             }
         }
+        stage('Scan Dependabot Alerts') {
+            when {
+                not {
+                    branch 'main'
+                }
+            }
+            environment {
+                GITHUB_TOKEN = credentials('github-token') // Store your GitHub token in Jenkins credentials           // Replace with your GitHub repo
+            }
+
+            steps {
+                script {
+                    def response = sh(
+                        script: """
+                            curl -s -H "Authorization: token ${GITHUB_TOKEN}" \\
+                            -H "Accept: application/vnd.github+json" \\
+                            https://api.github.com/repos/joindevops-1/catalogue/dependabot/alerts
+                        """,
+                        returnStdout: true
+                    )
+
+                    def alerts = readJSON text: response
+                    def highOrCritical = alerts.findAll { 
+                        it.security_vulnerability?.severity in ['high', 'critical']
+                    }
+
+                    if (highOrCritical.size() > 0) {
+                        echo "Found ${highOrCritical.size()} high/critical vulnerabilities!"
+                        error("Failing build due to unresolved security issues.")
+                    } else {
+                        echo "No high or critical vulnerabilities found."
+                    }
+                }
+            }
+        }
+
+
         stage('Docker Build') {
             steps {
                 script {
