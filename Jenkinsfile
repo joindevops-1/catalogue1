@@ -88,7 +88,7 @@ pipeline {
 
                     def alerts = readJSON text: response
                     def highOrCritical = alerts.findAll { 
-                        it.security_vulnerability?.severity in ['high', 'critical']
+                        it.security_vulnerability?.severity in ['high', 'critical','medium']
                     }
 
                     if (highOrCritical.size() > 0) {
